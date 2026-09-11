@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <defs>
+    <radialGradient id="bowl" cx="38%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#5a4330"/>
+      <stop offset="42%" stop-color="#24180f"/>
+      <stop offset="100%" stop-color="#070504"/>
+    </radialGradient>
+    <radialGradient id="rim" cx="50%" cy="50%" r="50%">
+      <stop offset="78%" stop-color="#1a120c"/>
+      <stop offset="86%" stop-color="#8a6a3d"/>
+      <stop offset="92%" stop-color="#3b2a18"/>
+      <stop offset="100%" stop-color="#120c08"/>
+    </radialGradient>
+    <radialGradient id="brew" cx="46%" cy="42%" r="55%">
+      <stop offset="0%" stop-color="#ffe7a1"/>
+      <stop offset="35%" stop-color="#e8b14a"/>
+      <stop offset="70%" stop-color="#a86b12"/>
+      <stop offset="100%" stop-color="#4a2a08"/>
+    </radialGradient>
+  </defs>
+  <circle cx="128" cy="128" r="128" fill="#0b1016"/>
+  <circle cx="128" cy="128" r="118" fill="url(#bowl)"/>
+  <circle cx="128" cy="128" r="118" fill="url(#rim)"/>
+  <circle cx="128" cy="128" r="74" fill="#140e0a"/>
+  <circle cx="128" cy="128" r="54" fill="url(#brew)"/>
+  <circle cx="112" cy="108" r="16" fill="#fff6cc" opacity="0.28"/>
+</svg>
