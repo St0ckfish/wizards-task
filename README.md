@@ -33,8 +33,11 @@ Open the URL printed by Vite (normally `http://localhost:5173`).
 
 ```bash
 bun run lint
+bun run typecheck
 bun run build
 ```
+
+Push and pull requests on `main` run the same checks in `.github/workflows/ci.yml`.
 
 ## Project structure
 
