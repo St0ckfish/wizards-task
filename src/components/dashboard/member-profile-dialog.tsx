@@ -99,7 +99,7 @@ export function MemberProfileDialog({
     <Dialog open={wizard !== null} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="grid h-[min(92svh,680px)] w-[calc(100%-1.5rem)] max-w-186 grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden rounded-lg border border-hairline/30 bg-surface p-0 ring-0 sm:max-w-186"
+        className="grid h-auto max-h-[min(92svh,921.6px)] w-[min(896px,calc(100%-2rem))] max-w-4xl grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden rounded-[16px] border border-hairline bg-surface p-0 shadow-none ring-0 sm:max-w-4xl"
       >
         {profile ? (
           <>
@@ -176,7 +176,7 @@ export function MemberProfileDialog({
               </div>
             </div>
 
-            <DialogFooter className="mx-0 mb-0 rounded-b-lg border-t border-foreground/4 bg-transparent px-6 py-5 sm:px-8">
+            <DialogFooter className="mx-0 mb-0 rounded-b-[16px] border-t border-hairline bg-transparent px-6 py-5 sm:px-8">
               <DialogClose
                 render={
                   <Button
