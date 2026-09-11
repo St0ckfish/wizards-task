@@ -26,6 +26,13 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   Pagination,
   PaginationContent,
   PaginationItem,
@@ -45,7 +52,18 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { formatCount, formatRegistryId } from "@/lib/format"
 import { panelClass } from "@/lib/panel"
 
-const PAGE_SIZE = 10
+const PAGE_SIZE_OPTIONS = [5, 10, 15, 20] as const
+
+const TABLE_COLUMNS = [
+  { heading: "ID", width: "w-[18%]" },
+  { heading: "Wizard Name", width: "w-[22%]" },
+  { heading: "Elixirs", width: "w-[12%]" },
+  { heading: "Associated Elixirs", width: "w-[36%]" },
+  { heading: "Actions", width: "w-[12%]" },
+] as const
+
+const headClass =
+  "h-12 px-4 text-[11px] font-medium tracking-[0.14em] text-secondary-light uppercase lg:px-6"
 
 function ElixirCell({
   elixirs,
@@ -69,7 +87,7 @@ function ElixirCell({
           <Badge
             key={elixir.id}
             variant="outline"
-            className="h-auto max-w-60 rounded-2xl border-[#41361b] bg-[#1c2220] px-2.5 py-1 text-[11px] leading-4 font-normal whitespace-normal text-gold"
+            className="h-auto max-w-full rounded-2xl border-[#41361b] bg-[#1c2220] px-2.5 py-1 text-[11px] leading-4 font-normal whitespace-normal text-gold sm:max-w-60"
           >
             {elixir.name}
           </Badge>
@@ -77,7 +95,7 @@ function ElixirCell({
           <Badge
             key={elixir.id}
             variant="outline"
-            className="h-auto max-w-48 rounded-full border-[#2a2b58] bg-[#151e3a] px-2.5 py-1 text-[11px] leading-4 font-normal whitespace-normal text-[#c6b6ff]"
+            className="h-auto max-w-full rounded-full border-[#2a2b58] bg-[#151e3a] px-2.5 py-1 text-[11px] leading-4 font-normal whitespace-normal text-[#c6b6ff] sm:max-w-48"
           >
             {elixir.name}
           </Badge>
@@ -100,6 +118,7 @@ function ElixirCell({
 export function WizardTable() {
   const [query, setQuery] = useState("")
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState<(typeof PAGE_SIZE_OPTIONS)[number]>(10)
   const [selected, setSelected] = useState<Wizard | null>(null)
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const debouncedQuery = useDebouncedValue(query, 400)
@@ -116,14 +135,14 @@ export function WizardTable() {
     queryFn: ({ signal }) => fetchWizards(debouncedQuery, signal),
   })
 
-  const pageCount = Math.max(1, Math.ceil(wizards.length / PAGE_SIZE))
+  const pageCount = Math.max(1, Math.ceil(wizards.length / pageSize))
   const currentPage = Math.min(page, pageCount)
   const visible = wizards.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
   )
-  const start = wizards.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1
-  const end = (currentPage - 1) * PAGE_SIZE + visible.length
+  const start = wizards.length === 0 ? 0 : (currentPage - 1) * pageSize + 1
+  const end = (currentPage - 1) * pageSize + visible.length
   const pagesToShow = useMemo(() => {
     const first = Math.max(1, Math.min(currentPage - 1, pageCount - 2))
     return Array.from(
@@ -141,15 +160,37 @@ export function WizardTable() {
     })
   }
 
+  const statusMessage = isError ? (
+    <div className="flex flex-col items-center justify-center gap-3 px-4 py-16 text-center">
+      <p className="text-[13px] text-coral">
+        {error instanceof Error ? error.message : "Unable to load wizards"}
+      </p>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => void refetch()}
+        className="border-white/10"
+      >
+        Try again
+      </Button>
+    </div>
+  ) : !isPending && visible.length === 0 ? (
+    <p className="px-4 py-16 text-center text-[13px] text-secondary-light">
+      No wizards found
+      {debouncedQuery ? ` for “${debouncedQuery}”` : ""}. Try a first or last
+      name like Fred, Weasley, or Potter.
+    </p>
+  ) : null
+
   return (
-    <Card className={panelClass}>
+    <Card className={`${panelClass} max-sm:[--card-spacing:--spacing(4)]`}>
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle className="text-[15px] font-medium tracking-tight">
           Master Wizard Registry
         </CardTitle>
 
-        {/* Search and Filter share one control, split by a hairline divider. */}
-        <div className="flex h-10 w-full items-center rounded-[10px] border border-input bg-card/90 sm:w-76">
+        <div className="flex h-10 w-full min-w-0 items-center rounded-[10px] border border-input bg-card/90 sm:max-w-76">
           <label className="relative flex min-w-0 flex-1 items-center">
             <span className="sr-only">Search wizards</span>
             <Search className="pointer-events-none absolute left-3 size-3.5 text-secondary-light" />
@@ -161,9 +202,9 @@ export function WizardTable() {
                 setPage(1)
                 setExpandedRows(new Set())
               }}
-              placeholder="Search wizards..."
+              placeholder="Search by name..."
               aria-label="Search wizards by first or last name"
-              className="h-10 rounded-none border-0 bg-transparent pr-2 pl-9 text-[13px] placeholder:text-secondary-light/50 focus-visible:ring-0 dark:bg-transparent"
+              className="h-10 min-w-0 rounded-none border-0 bg-transparent pr-2 pl-9 text-[13px] placeholder:text-secondary-light/50 focus-visible:ring-0 dark:bg-transparent"
             />
             {isFetching ? (
               <LoaderCircle
@@ -176,132 +217,196 @@ export function WizardTable() {
           <Button
             type="button"
             variant="ghost"
-            className="h-10 shrink-0 rounded-none rounded-r-[10px] px-3 text-[13px] font-normal text-secondary-light hover:text-foreground"
+            className="h-10 shrink-0 rounded-none rounded-r-[10px] px-2.5 text-[13px] font-normal text-secondary-light hover:text-foreground sm:px-3"
           >
             <ListFilter className="size-3.5" data-icon="inline-start" />
-            Filter
+            <span className="hidden sm:inline">Filter</span>
           </Button>
         </div>
       </CardHeader>
 
       <CardContent className="px-0">
-        <Table className="table-fixed">
-          <TableHeader>
-            <TableRow className="border-transparent bg-card hover:bg-card">
-              {(
-                [
-                  ["ID", "w-[18%]"],
-                  ["Wizard Name", "w-[22%]"],
-                  ["Elixirs", "w-[12%]"],
-                  ["Associated Elixirs", "w-[36%]"],
-                  ["Actions", "w-[12%]"],
-                ] as const
-              ).map(([heading, width]) => (
-                <TableHead
-                  key={heading}
-                  className={`h-12 px-6 text-[11px] font-medium tracking-[0.14em] text-secondary-light uppercase ${width}`}
+        {statusMessage}
+
+        {isPending ? (
+          <>
+            <div className="space-y-3 px-4 md:hidden">
+              {Array.from({ length: 4 }, (_, index) => (
+                <div
+                  key={`mobile-loading-${index}`}
+                  className="space-y-3 rounded-lg border border-hairline/30 p-4"
                 >
-                  {heading}
-                </TableHead>
+                  <Skeleton className="h-4 w-40 bg-white/8" />
+                  <Skeleton className="h-3 w-28 bg-white/8" />
+                  <Skeleton className="h-6 w-48 bg-white/8" />
+                </div>
               ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isPending
-              ? Array.from({ length: 5 }, (_, index) => (
-                  <TableRow
-                    key={`loading-${index}`}
-                    className="border-foreground/3"
-                  >
-                    {Array.from({ length: 5 }, (_, cell) => (
-                      <TableCell key={cell} className="h-16 px-6">
-                        <Skeleton className="h-3 w-full max-w-32 bg-white/8" />
-                      </TableCell>
+            </div>
+            <div className="hidden md:block">
+              <Table className="min-w-180">
+                <TableHeader>
+                  <TableRow className="border-transparent bg-card hover:bg-card">
+                    {TABLE_COLUMNS.map((column) => (
+                      <TableHead key={column.heading} className={headClass}>
+                        {column.heading}
+                      </TableHead>
                     ))}
                   </TableRow>
-                ))
-              : null}
-            {isError ? (
-              <TableRow className="border-0 hover:bg-transparent">
-                <TableCell colSpan={5} className="h-40 px-6 text-center">
-                  <p className="text-[13px] text-coral">
-                    {error instanceof Error
-                      ? error.message
-                      : "Unable to load wizards"}
+                </TableHeader>
+                <TableBody>
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <TableRow
+                      key={`loading-${index}`}
+                      className="border-foreground/3"
+                    >
+                      {Array.from({ length: 5 }, (_, cell) => (
+                        <TableCell key={cell} className="h-16 px-4 lg:px-6">
+                          <Skeleton className="h-3 w-full max-w-32 bg-white/8" />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
+        ) : null}
+
+        {!isPending && !isError && visible.length > 0 ? (
+          <>
+            <ul className="space-y-3 px-4 md:hidden">
+              {visible.map((wizard) => (
+                <li
+                  key={wizard.id}
+                  className="rounded-lg border border-hairline/30 bg-foreground/2 p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[14px] font-medium">
+                        {getWizardName(wizard)}
+                      </p>
+                      <p className="mt-1 font-mono text-[11px] text-lavender">
+                        {formatRegistryId(wizard.id)}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 shrink-0 text-secondary-light hover:text-foreground"
+                      aria-label={`View ${getWizardName(wizard)}`}
+                      onClick={() => setSelected(wizard)}
+                    >
+                      <Eye className="size-4" />
+                    </Button>
+                  </div>
+                  <p className="mt-3 text-[12px] text-secondary-light">
+                    {wizard.elixirs.length}{" "}
+                    {wizard.elixirs.length === 1 ? "elixir" : "elixirs"}
                   </p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => void refetch()}
-                    className="mt-3 border-white/10"
-                  >
-                    Try again
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ) : null}
-            {!isPending && !isError && visible.length === 0 ? (
-              <TableRow className="border-0 hover:bg-transparent">
-                <TableCell
-                  colSpan={5}
-                  className="h-40 px-6 text-center text-[13px] text-secondary-light"
-                >
-                  No wizards found
-                  {debouncedQuery ? ` for “${debouncedQuery}”` : ""}.
-                </TableCell>
-              </TableRow>
-            ) : null}
-            {!isPending && !isError
-              ? visible.map((wizard) => (
-              <TableRow
-                key={wizard.id}
-                className="border-foreground/3 hover:bg-foreground/2"
-              >
-                <TableCell className="px-6 py-4 font-mono text-[12px] text-lavender">
-                  {formatRegistryId(wizard.id)}
-                </TableCell>
-                <TableCell
-                  className="px-6 py-4 text-[13px] font-medium whitespace-normal"
-                >
-                  {getWizardName(wizard)}
-                </TableCell>
-                <TableCell className="px-6 py-4 text-[13px] text-secondary-light">
-                  {wizard.elixirs.length}
-                </TableCell>
-                <TableCell className="px-6 py-4">
-                  <ElixirCell
-                    elixirs={wizard.elixirs}
-                    expanded={expandedRows.has(wizard.id)}
-                    onToggle={() => toggleElixirs(wizard.id)}
-                  />
-                </TableCell>
-                <TableCell className="px-6 py-4">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="size-8 text-secondary-light hover:text-foreground"
-                    aria-label={`View ${getWizardName(wizard)}`}
-                    onClick={() => setSelected(wizard)}
-                  >
-                    <Eye className="size-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-              ))
-              : null}
-          </TableBody>
-        </Table>
+                  <div className="mt-2">
+                    <ElixirCell
+                      elixirs={wizard.elixirs}
+                      expanded={expandedRows.has(wizard.id)}
+                      onToggle={() => toggleElixirs(wizard.id)}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            <div className="hidden md:block">
+              <Table className="min-w-180">
+                <TableHeader>
+                  <TableRow className="border-transparent bg-card hover:bg-card">
+                    {TABLE_COLUMNS.map((column) => (
+                      <TableHead
+                        key={column.heading}
+                        className={`${headClass} ${column.width}`}
+                      >
+                        {column.heading}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {visible.map((wizard) => (
+                    <TableRow
+                      key={wizard.id}
+                      className="border-foreground/3 hover:bg-foreground/2"
+                    >
+                      <TableCell className="px-4 py-4 font-mono text-[12px] text-lavender lg:px-6">
+                        {formatRegistryId(wizard.id)}
+                      </TableCell>
+                      <TableCell className="px-4 py-4 text-[13px] font-medium whitespace-normal lg:px-6">
+                        {getWizardName(wizard)}
+                      </TableCell>
+                      <TableCell className="px-4 py-4 text-[13px] text-secondary-light lg:px-6">
+                        {wizard.elixirs.length}
+                      </TableCell>
+                      <TableCell className="px-4 py-4 whitespace-normal lg:px-6">
+                        <ElixirCell
+                          elixirs={wizard.elixirs}
+                          expanded={expandedRows.has(wizard.id)}
+                          onToggle={() => toggleElixirs(wizard.id)}
+                        />
+                      </TableCell>
+                      <TableCell className="px-4 py-4 lg:px-6">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 text-secondary-light hover:text-foreground"
+                          aria-label={`View ${getWizardName(wizard)}`}
+                          onClick={() => setSelected(wizard)}
+                        >
+                          <Eye className="size-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
+        ) : null}
       </CardContent>
 
-      <CardFooter className="flex flex-col gap-3 border-t-0 bg-foreground/4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-[12px] text-secondary-light">
-          {isPending
-            ? "Loading wizard records..."
-            : `Showing ${start}-${end} of ${formatCount(wizards.length)} Records`}
-        </p>
-        <Pagination className="mx-0 w-auto justify-end">
+      <CardFooter className="flex flex-col gap-3 border-t-0 bg-foreground/4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="flex w-full flex-wrap items-center justify-between gap-3 sm:w-auto sm:justify-start">
+          <p className="text-[12px] text-secondary-light">
+            {isPending
+              ? "Loading wizard records..."
+              : `Showing ${start}-${end} of ${formatCount(wizards.length)} Records`}
+          </p>
+          <div className="flex items-center gap-2 text-[12px] text-secondary-light">
+            <span id="rows-per-page-label">Rows</span>
+            <Select
+              value={String(pageSize)}
+              onValueChange={(value) => {
+                if (!value) return
+                setPageSize(Number(value) as (typeof PAGE_SIZE_OPTIONS)[number])
+                setPage(1)
+              }}
+            >
+              <SelectTrigger
+                size="sm"
+                aria-labelledby="rows-per-page-label"
+                className="min-w-16 bg-card"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent align="start" alignItemWithTrigger={false}>
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <SelectItem key={size} value={String(size)}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <Pagination className="mx-0 w-full justify-center sm:w-auto sm:justify-end">
           <PaginationContent>
             <PaginationItem>
               <Button

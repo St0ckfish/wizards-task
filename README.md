@@ -10,11 +10,13 @@ Tailwind CSS, shadcn/ui, Recharts, and TanStack Query.
   [Wizard World API](https://wizard-world-api.herokuapp.com/Wizards)
 - First- or last-name API search with a 400 ms debounce
 - TanStack Query caching, cancellation, retry, and error handling
-- Client-side pagination with 10 records per page
+- Client-side pagination with a shadcn Select for 5 / 10 / 15 / 20 rows
+- Case-insensitive first- or last-name search (API params + local fallback)
 - Loading skeletons, empty results, and retryable error state
 - Graceful `null` name handling
 - Expandable elixir lists and API-backed member profile modals
-- Responsive sidebar, table, and mobile navigation
+- Interactive specialty donut and activity bar hover states
+- Responsive registry: stacked cards on mobile, table from tablet up
 
 ## Run locally
 

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { ChevronRight, FlaskConical, PenLine, Syringe } from "lucide-react"
 
 import {
@@ -64,7 +65,7 @@ function ElixirRow({ elixir }: { elixir: WizardElixir }) {
   )
 }
 
-function DetailField({ label, children }: { label: string; children: React.ReactNode }) {
+function DetailField({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
       <p className="text-[13px] text-secondary-light">{label}</p>
@@ -98,7 +99,7 @@ export function MemberProfileDialog({
     <Dialog open={wizard !== null} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="max-h-[min(92svh,760px)] w-[calc(100%-1.5rem)] max-w-[744px] gap-0 overflow-y-auto rounded-lg border border-hairline/30 bg-surface p-0 ring-0 sm:max-w-[744px]"
+        className="grid h-[min(92svh,680px)] w-[calc(100%-1.5rem)] max-w-186 grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden rounded-lg border border-hairline/30 bg-surface p-0 ring-0 sm:max-w-186"
       >
         {profile ? (
           <>
@@ -124,12 +125,12 @@ export function MemberProfileDialog({
               </div>
             </DialogHeader>
 
-            <div className="grid gap-6 px-6 py-6 sm:grid-cols-[220px_minmax(0,1fr)] sm:items-start sm:px-8">
-              <div className="flex flex-col items-start gap-4">
+            <div className="flex min-h-0 flex-col gap-6 overflow-hidden px-6 py-6 sm:flex-row sm:px-8">
+              <div className="flex w-full shrink-0 flex-col items-start gap-4 sm:w-55">
                 <img
                   src={profile.portrait}
                   alt=""
-                  className="size-[180px] rounded-full object-cover ring-1 ring-lavender/25 shadow-[0_0_30px_0_rgb(208_188_255/12%)]"
+                  className="size-45 rounded-full object-cover ring-1 ring-lavender/25 shadow-[0_0_30px_0_rgb(208_188_255/12%)]"
                 />
                 <div className="flex flex-wrap gap-2">
                   {profile.badges.map((badge) => (
@@ -138,8 +139,8 @@ export function MemberProfileDialog({
                 </div>
               </div>
 
-              <div className="space-y-5">
-                <div className="grid gap-5 rounded-[8px] bg-[#081727] p-5 sm:grid-cols-2">
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-5 overflow-hidden">
+                <div className="grid shrink-0 gap-5 rounded-[8px] bg-[#081727] p-5 sm:grid-cols-2">
                   <DetailField label="First Name">{profile.givenName}</DetailField>
                   <DetailField label="Last Name">{profile.familyName}</DetailField>
                   <DetailField label="Registry Status">
@@ -153,13 +154,13 @@ export function MemberProfileDialog({
                   </DetailField>
                 </div>
 
-                <section>
-                  <h3 className="mb-3 flex items-center gap-2 text-[15px] font-medium">
+                <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                  <h3 className="mb-3 shrink-0 flex items-center gap-2 text-[15px] font-medium">
                     <FlaskConical className="size-4 text-lavender" />
                     Associated Elixirs
                   </h3>
                   {profile.associatedElixirs.length > 0 ? (
-                    <ul className="space-y-2">
+                    <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain pr-1">
                       {profile.associatedElixirs.map((elixir) => (
                         <li key={elixir.id}>
                           <ElixirRow elixir={elixir} />

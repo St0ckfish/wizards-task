@@ -43,19 +43,23 @@ export function ActivityChart() {
             />
             <YAxis hide domain={[0, 108]} ticks={[0, 36, 72, 108]} />
             <Tooltip
-              cursor={{ fill: "rgb(212 228 250 / 4%)" }}
+              cursor={{ fill: "rgb(208 188 255 / 14%)" }}
               contentStyle={{
-                background: "#101f30",
-                border: "1px solid rgb(212 228 250 / 8%)",
+                background: "#0d1c2d",
+                border: "1px solid rgb(208 188 255 / 28%)",
                 borderRadius: 12,
                 fontSize: 12,
                 color: "#d4e4fa",
+                boxShadow: "0 0 20px 0 rgb(208 188 255 / 15%)",
               }}
+              labelStyle={{ color: "#cbc3d7", marginBottom: 4 }}
+              itemStyle={{ color: "#d0bcff" }}
               formatter={(value) => [value ?? 0, "Filings"]}
             />
             <Bar
               dataKey="value"
               fill="var(--color-bar)"
+              activeBar={{ fill: "#d0bcff" }}
               radius={[7, 7, 0, 0]}
               maxBarSize={48}
               isAnimationActive={false}
